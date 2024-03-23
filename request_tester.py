@@ -3,49 +3,51 @@ import json
 
 
 
-def create_queue():
-    global url, data
+def add_queue(description, creator_id):
     url = 'http://127.0.0.1:5000/queues/add_queue'
 
     # JSON данные, которые вы хотите отправить
     data = {
-        'description': 'test queue',
-        'creator_id': '123123123123',
+        'description': description,
+        'creator_id': creator_id,
     }
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data)
+    print(response.text)
 
-def add_user():
-    global url, data
+def add_user_to_queue(queue_identifier, user_id):
     url = 'http://127.0.0.1:5000/queues/add_user_to_queue'
 
     # JSON данные, которые вы хотите отправить
     data = {
-        'queue_identifier': '339999194338',
-        'user_id': '123123123123',
+        'queue_identifier': queue_identifier,
+        'user_id': user_id,
     }
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data)
+    print(response.text)
 
-def get_queue():
-    global url, data
+def get_queue(queue_identifier):
     url = 'http://127.0.0.1:5000/queues/get_queue'
 
     # JSON данные, которые вы хотите отправить
     data = {
-        'queue_identifier': '339999194338',
+        'queue_identifier': queue_identifier
     }
-def delete_user():
-    global url, data
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data)
+    print(response.text)
+def delete_user_from_queue(queue_identifier, user_id):
     url = 'http://127.0.0.1:5000/queues/delete_user_from_queue'
 
     # JSON данные, которые вы хотите отправить
     data = {
-        'queue_identifier': '339999194338',
-        'user_id': '123123123121',
+        'queue_identifier': queue_identifier,
+        'user_id': user_id,
     }
-delete_user()
-# Преобразование данных в формат JSON
-json_data = json.dumps(data)
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data)
+    print(response.text)
 
-# Отправка POST запроса с JSON данными
-response = requests.post(url, json=json_data)
-
-# Печать ответа сервера
-print(response.text)
+add_user_to_queue("123123123123", "456654289987")
+#get_queue("123123123123"):
