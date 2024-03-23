@@ -1,0 +1,70 @@
+import sqlite3
+import traceback
+import other_tools
+
+
+db_path = 'queue_proj_database.db'
+
+
+def db_action_write(clause, props=None):
+    with sqlite3.connect(db_path, timeout=99999999999999999999) as connect:
+        cursor = connect.cursor()
+        if props != None:
+            cursor.execute(clause, props)
+        else:
+            cursor.execute(clause)
+
+def db_action_read(clause, props=None):
+    with sqlite3.connect(db_path, timeout=99999999999999999999) as connect:
+        cursor = connect.cursor()
+        if props != None:
+            cursor.execute(clause, props)
+        else:
+            cursor.execute(clause)
+        result = cursor.fetchall()
+        return result
+
+def init_create_tables():
+    db_action_write('''CREATE TABLE IF NOT EXISTS queues (identifier TEXT, description TEXT, creator_id TEXT)''')
+    db_action_write('''CREATE TABLE IF NOT EXISTS users (person_id TEXT, name TEXT, reputation INT, password_hash TEXT)''')
+
+init_create_tables()
+
+def add_new_user(name):
+    new_user_id = other_tools.generate_id()
+    db_action_write("INSERT INTO users (user_id, name, reputation) VALUES (?, ?, ?)", ([new_user_id, name, 0]))
+    return new_user_id
+
+
+def add_new_queue(description, creator_id):
+    new_queue_id = other_tools.generate_id()
+    db_action_write("INSERT INTO queues (identifier, description, creator_id) VALUES (?, ?, ?)", ([new_queue_id, description, creator_id]))
+    db_action_write(
+        '''CREATE TABLE queue_'''+new_queue_id+''' (user_id TEXT, position INT, adding_time TEXT)''')
+    return new_queue_id
+
+def refresh_users_positions_in_queue(queue_identifier):
+    assert other_tools.validate_id(queue_identifier)
+    queue_dump = db_action_read("SELECT * FROM queue_"+queue_identifier+"")
+    sorted_dump = sorted(queue_dump, key=lambda x: float(x[2]))
+    for i in range(0, len(sorted_dump)):
+        if sorted_dump[i][1] != i:
+            current_id = sorted_dump[i][0]
+            db_action_write("UPDATE queue_" + queue_identifier + " SET position=? WHERE user_id=?", [i, current_id])
+
+def add_user_to_queue(queue_identifier, user_id, adding_time):
+    assert other_tools.validate_id(queue_identifier)
+    assert other_tools.validate_id(user_id)
+    position = len(db_action_read("SELECT * FROM queue_"+queue_identifier))
+    db_action_write("INSERT INTO queue_"+queue_identifier+" (user_id, position, adding_time) VALUES (?, ?, ?)", ([user_id, position, adding_time]))
+
+
+def delete_user_from_queue(queue_identifier, user_id):
+    assert other_tools.validate_id(queue_identifier)
+    assert other_tools.validate_id(user_id)
+    db_action_write("DELETE FROM queue_"+queue_identifier+" WHERE user_id=?", [user_id])
+    refresh_users_positions_in_queue(queue_identifier)
+
+def get_queue(queue_identifier):
+    assert other_tools.validate_id(queue_identifier)
+    return db_action_read("SELECT * FROM queue_"+queue_identifier+"")
