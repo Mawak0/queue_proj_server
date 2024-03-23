@@ -49,5 +49,6 @@ def delete_user_from_queue(queue_identifier, user_id):
     response = requests.post(url, json=json_data)
     print(response.text)
 
-add_user_to_queue("123123123123", "456654289987")
-#get_queue("123123123123"):
+#add_user_to_queue("339999194338", "456654289987")
+#get_queue("123123123123")
+delete_user_from_queue("339999194338", "456654289987")

@@ -14,7 +14,7 @@ import other_tools
 
 app = Flask("queue_proj_server")
 
-possible_reply_statuses = ["done", "fail"]
+possible_reply_statuses = ["done", "fail", "error: user_not_in_queue", "error: user_already_in_queue"]
 
 def reply_json_former(status, data={}):
     assert (status in possible_reply_statuses)
@@ -45,6 +45,8 @@ def add_queue():
 def add_user_to_queue():
     try:
         request_json = json.loads(request.json)
+        if request_json['user_id'] in other_tools.get_users_in_queue(db_tools.get_queue(request_json['queue_identifier'])):
+            return reply_json_former('error: user_already_in_queue')
         db_tools.add_user_to_queue(request_json['queue_identifier'], request_json['user_id'], str(time.time()))
         return reply_json_former('done')
     except Exception as e:
@@ -55,6 +57,8 @@ def add_user_to_queue():
 def delete_user_from_queue():
     try:
         request_json = json.loads(request.json)
+        if request_json['user_id'] not in other_tools.get_users_in_queue(db_tools.get_queue(request_json['queue_identifier'])):
+            return reply_json_former('error: user_not_in_queue')
         db_tools.delete_user_from_queue(request_json['queue_identifier'], request_json['user_id'])
         return reply_json_former('done')
     except Exception as e:
