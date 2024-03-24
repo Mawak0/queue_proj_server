@@ -1,6 +1,8 @@
 import random
 import json
 
+empty_id = "000000000000"
+
 def generate_id():
     return str(random.randint(100000000000, 999999999999))
 

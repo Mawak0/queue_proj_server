@@ -26,14 +26,25 @@ def db_action_read(clause, props=None):
 
 def init_create_tables():
     db_action_write('''CREATE TABLE IF NOT EXISTS queues (identifier TEXT, description TEXT, creator_id TEXT)''')
-    db_action_write('''CREATE TABLE IF NOT EXISTS users (person_id TEXT, name TEXT, reputation INT, password_hash TEXT)''')
+    db_action_write('''CREATE TABLE IF NOT EXISTS users (user_id TEXT, user_name TEXT, reputation INT)''')
 
 init_create_tables()
 
+
+def is_user_exist(user_id):
+    assert other_tools.validate_id(user_id)
+    user = db_action_read("SELECT * FROM users WHERE user_id=?", [user_id])
+    if len(user) == 0:
+        return False
+    return True
+
 def add_new_user(name):
     new_user_id = other_tools.generate_id()
-    db_action_write("INSERT INTO users (user_id, name, reputation) VALUES (?, ?, ?)", ([new_user_id, name, 0]))
+    db_action_write("INSERT INTO users (user_id, user_name, reputation) VALUES (?, ?, ?)", ([new_user_id, name, 0]))
     return new_user_id
+
+def get_all_users():
+    return db_action_read("SELECT * FROM users")
 
 
 def add_new_queue(description, creator_id):
@@ -67,4 +78,16 @@ def delete_user_from_queue(queue_identifier, user_id):
 
 def get_queue(queue_identifier):
     assert other_tools.validate_id(queue_identifier)
-    return db_action_read("SELECT * FROM queue_"+queue_identifier+"")
+    rows = db_action_read("SELECT * FROM queue_"+queue_identifier+"")
+    out = []
+    for r in rows:
+        out.append(dict())
+        out[-1]['user_id'] = r[0]
+        out[-1]['position'] = r[1]
+        out[-1]['adding_time'] = r[2]
+    return out
+
+def get_user_name(user_id):
+    assert other_tools.validate_id(user_id)
+    name = db_action_read("SELECT user_name FROM users WHERE user_id=?", [user_id])[0][0]
+    return name
