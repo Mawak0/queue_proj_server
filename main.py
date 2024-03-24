@@ -14,7 +14,8 @@ import other_tools
 
 app = Flask("queue_proj_server")
 
-possible_reply_statuses = ["done", "fail", "error: user_not_in_queue", "error: user_already_in_queue"]
+possible_reply_statuses = ["done", "fail", "error: user_not_in_queue", "error: user_already_in_queue",
+                           "error: user_does_not_exist", "error: queue_does_not_exist"]
 
 def reply_json_former(status, data={}):
     assert (status in possible_reply_statuses)
@@ -26,6 +27,10 @@ def get_queue():
     try:
         request_json = json.loads(request.json)
         data = db_tools.get_queue(request_json['queue_identifier'])
+        for i in range(0, len(data)):
+            username = db_tools.get_user_name(data[i]['user_id'])
+            data[i]['user_id'] = other_tools.empty_id
+            data[i]['user_name'] = username
         return reply_json_former('done', data)
     except Exception as e:
         traceback.print_exc()
@@ -45,6 +50,10 @@ def add_queue():
 def add_user_to_queue():
     try:
         request_json = json.loads(request.json)
+        if not db_tools.is_user_exist(request_json['user_id']):
+            return reply_json_former('error: user_does_not_exist')
+        if not db_tools.is_queue_exist(request_json['queue_identifier']):
+            return reply_json_former('error: queue_does_not_exist')
         if request_json['user_id'] in other_tools.get_users_in_queue(db_tools.get_queue(request_json['queue_identifier'])):
             return reply_json_former('error: user_already_in_queue')
         db_tools.add_user_to_queue(request_json['queue_identifier'], request_json['user_id'], str(time.time()))
@@ -61,6 +70,16 @@ def delete_user_from_queue():
             return reply_json_former('error: user_not_in_queue')
         db_tools.delete_user_from_queue(request_json['queue_identifier'], request_json['user_id'])
         return reply_json_former('done')
+    except Exception as e:
+        traceback.print_exc()
+        return reply_json_former('fail')
+
+@app.route('/users/add_user', methods=['POST'])
+def add_user():
+    try:
+        request_json = json.loads(request.json)
+        new_user_id = db_tools.add_new_user(request_json['user_name'])
+        return reply_json_former('done', {"user_id": new_user_id})
     except Exception as e:
         traceback.print_exc()
         return reply_json_former('fail')
