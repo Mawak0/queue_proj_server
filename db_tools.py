@@ -38,6 +38,13 @@ def is_user_exist(user_id):
         return False
     return True
 
+def is_queue_exist(identifier):
+    assert other_tools.validate_id(identifier)
+    queue = db_action_read("SELECT * FROM queues WHERE identifier=?", [identifier])
+    if len(queue) == 0:
+        return False
+    return True
+
 def add_new_user(name):
     new_user_id = other_tools.generate_id()
     db_action_write("INSERT INTO users (user_id, user_name, reputation) VALUES (?, ?, ?)", ([new_user_id, name, 0]))

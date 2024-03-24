@@ -16,5 +16,6 @@ def validate_id(identifier):
     return False
 
 def get_users_in_queue(queue):
-    user_ids = [e[0] for e in queue]
+    print(queue)
+    user_ids = [e['user_id'] for e in queue]
     return user_ids
