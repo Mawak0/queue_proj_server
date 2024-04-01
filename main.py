@@ -25,7 +25,10 @@ def reply_json_former(status, data={}):
 @app.route('/queues/get_queue', methods=['POST'])
 def get_queue():
     try:
-        request_json = json.loads(request.json)
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
         data = db_tools.get_queue(request_json['queue_identifier'])
         for i in range(0, len(data)):
             username = db_tools.get_user_name(data[i]['user_id'])
@@ -39,7 +42,10 @@ def get_queue():
 @app.route('/queues/add_queue', methods=['POST'])
 def add_queue():
     try:
-        request_json = json.loads(request.json)
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
         new_queue_id = db_tools.add_new_queue(request_json['description'], request_json['creator_id'])
         return reply_json_former("done", {"new_queue_id": new_queue_id})
     except Exception as e:
@@ -49,7 +55,10 @@ def add_queue():
 @app.route('/queues/add_user_to_queue', methods=['POST'])
 def add_user_to_queue():
     try:
-        request_json = json.loads(request.json)
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
         if not db_tools.is_user_exist(request_json['user_id']):
             return reply_json_former('error: user_does_not_exist')
         if not db_tools.is_queue_exist(request_json['queue_identifier']):
@@ -65,7 +74,10 @@ def add_user_to_queue():
 @app.route('/queues/delete_user_from_queue', methods=['POST'])
 def delete_user_from_queue():
     try:
-        request_json = json.loads(request.json)
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
         if request_json['user_id'] not in other_tools.get_users_in_queue(db_tools.get_queue(request_json['queue_identifier'])):
             return reply_json_former('error: user_not_in_queue')
         db_tools.delete_user_from_queue(request_json['queue_identifier'], request_json['user_id'])
@@ -77,7 +89,10 @@ def delete_user_from_queue():
 @app.route('/users/add_user', methods=['POST'])
 def add_user():
     try:
-        request_json = json.loads(request.json)
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
         new_user_id = db_tools.add_new_user(request_json['user_name'])
         return reply_json_former('done', {"user_id": new_user_id})
     except Exception as e:
