@@ -47,7 +47,21 @@ def add_queue():
         else:
             request_json = request.json
         new_queue_id = db_tools.add_new_queue(request_json['description'], request_json['creator_id'])
-        return reply_json_former("done", {"new_queue_id": new_queue_id})
+        base64_image = other_tools.make_queue_qr_image(new_queue_id)
+        return reply_json_former("done", {"new_queue_id": new_queue_id, "base64_image": str(base64_image)})
+    except Exception as e:
+        traceback.print_exc()
+        return reply_json_former("fail")
+
+@app.route('/queues/get_queue_image', methods=['POST'])
+def add_queue_image():
+    try:
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
+        base64_image = other_tools.make_queue_qr_image(request_json['queue_identifier'])
+        return reply_json_former("done", {"base64_image": str(base64_image)})
     except Exception as e:
         traceback.print_exc()
         return reply_json_former("fail")
