@@ -78,6 +78,10 @@ def add_user_to_queue(queue_identifier, user_id, adding_time):
     db_action_write("INSERT INTO queue_"+queue_identifier+" (user_id, position, adding_time) VALUES (?, ?, ?)", ([user_id, position, adding_time]))
     db_action_write("INSERT INTO users_queue_lists (user_id, in_queue) VALUES (?, ?)",([user_id, queue_identifier]))
 
+def get_queue_description(queue_identifier):
+    assert other_tools.validate_id(queue_identifier)
+    description = db_action_read("SELECT description FROM queues WHERE identifier=?", [queue_identifier])[0][0]
+    return description
 
 def delete_user_from_queue(queue_identifier, user_id):
     assert other_tools.validate_id(queue_identifier)

@@ -72,7 +72,7 @@ def get_queue_image(queue_identifier):
     print(response.text)
 
 def get_current_user_queues(user_id):
-    url = 'http://127.0.0.1:5000/users/get_current_user_queues'
+    url = 'http://doujinshiradio.ru:5000/users/get_current_user_queues'
 
     # JSON данные, которые вы хотите отправить
     data = {
@@ -94,6 +94,17 @@ def get_user_position_in_queue(user_id, queue_id):
     response = requests.post(url, json=json_data)
     print(response.text)
 
+def get_queue_description(queue_id):
+    url = 'http://127.0.0.1:5000/queues/get_queue_description'
+
+    # JSON данные, которые вы хотите отправить
+    data = {
+        'queue_identifier': queue_id
+    }
+    json_data = json.dumps(data)
+    response = requests.post(url, json=json_data)
+    print(response.text)
+
 #add_user_to_queue("339999194338", "456654289987")
 #get_queue("385882291518")
 #delete_user_from_queue("339999194338", "456654289987")
@@ -104,6 +115,7 @@ def get_user_position_in_queue(user_id, queue_id):
 #add_user_to_queue("507223812912", "456654289980")
 #delete_user_from_queue("339106682759", "453415766387")
 #add_user_to_queue("339106682759", "453415766387")
-get_current_user_queues("453415766387")
+#get_current_user_queues("453415766387")
+get_queue_description("339106682759")
 #get_user_position_in_queue("453415766387", "339106682759")
 #get_queue_image("850409622132")
