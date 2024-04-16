@@ -100,6 +100,19 @@ def delete_user_from_queue():
         traceback.print_exc()
         return reply_json_former('fail')
 
+@app.route('/queues/get_queue_description', methods=['POST'])
+def get_queue_description():
+    try:
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
+        description = db_tools.get_queue_description(request_json['queue_identifier'])
+        return reply_json_former('done', {"queue_description": description})
+    except Exception as e:
+        traceback.print_exc()
+        return reply_json_former('fail')
+
 @app.route('/users/get_current_user_queues', methods=['POST'])
 def get_current_user_queues():
     try:
