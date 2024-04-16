@@ -27,6 +27,7 @@ def db_action_read(clause, props=None):
 def init_create_tables():
     db_action_write('''CREATE TABLE IF NOT EXISTS queues (identifier TEXT, description TEXT, creator_id TEXT)''')
     db_action_write('''CREATE TABLE IF NOT EXISTS users (user_id TEXT, user_name TEXT, reputation INT)''')
+    db_action_write('''CREATE TABLE IF NOT EXISTS users_queue_lists (user_id TEXT, in_queue TEXT)''')
 
 init_create_tables()
 
@@ -75,6 +76,7 @@ def add_user_to_queue(queue_identifier, user_id, adding_time):
     assert other_tools.validate_id(user_id)
     position = len(db_action_read("SELECT * FROM queue_"+queue_identifier))
     db_action_write("INSERT INTO queue_"+queue_identifier+" (user_id, position, adding_time) VALUES (?, ?, ?)", ([user_id, position, adding_time]))
+    db_action_write("INSERT INTO users_queue_lists (user_id, in_queue) VALUES (?, ?)",([user_id, queue_identifier]))
 
 
 def delete_user_from_queue(queue_identifier, user_id):
@@ -82,6 +84,18 @@ def delete_user_from_queue(queue_identifier, user_id):
     assert other_tools.validate_id(user_id)
     db_action_write("DELETE FROM queue_"+queue_identifier+" WHERE user_id=?", [user_id])
     refresh_users_positions_in_queue(queue_identifier)
+    db_action_write("DELETE FROM users_queue_lists WHERE user_id=? AND in_queue=?", [user_id, queue_identifier])
+
+def get_current_user_queues(user_id):
+    assert other_tools.validate_id(user_id)
+    user_queues_list = db_action_read("SELECT in_queue FROM users_queue_lists WHERE user_id=?", [user_id])
+    return [i[0] for i in user_queues_list]
+
+def get_user_position_in_queue(user_id, queue_identifier):
+    assert other_tools.validate_id(queue_identifier)
+    assert other_tools.validate_id(user_id)
+    position = db_action_read("SELECT position FROM queue_"+queue_identifier+" WHERE user_id=?", [user_id])[0][0]
+    return position
 
 def get_queue(queue_identifier):
     assert other_tools.validate_id(queue_identifier)

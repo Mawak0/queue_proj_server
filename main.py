@@ -100,6 +100,32 @@ def delete_user_from_queue():
         traceback.print_exc()
         return reply_json_former('fail')
 
+@app.route('/users/get_current_user_queues', methods=['POST'])
+def get_current_user_queues():
+    try:
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
+        queues = db_tools.get_current_user_queues(request_json['user_id'])
+        return reply_json_former('done', {"current_user_queues": queues})
+    except Exception as e:
+        traceback.print_exc()
+        return reply_json_former('fail')
+
+@app.route('/queues/get_user_position_in_queue', methods=['POST'])
+def get_user_position_in_queue():
+    try:
+        if type(request.json) == type(""):
+            request_json = json.loads(request.json)
+        else:
+            request_json = request.json
+        position = db_tools.get_user_position_in_queue(request_json['user_id'], request_json['queue_identifier'])
+        return reply_json_former('done', {"user_position": position})
+    except Exception as e:
+        traceback.print_exc()
+        return reply_json_former('fail')
+
 @app.route('/users/add_user', methods=['POST'])
 def add_user():
     try:
